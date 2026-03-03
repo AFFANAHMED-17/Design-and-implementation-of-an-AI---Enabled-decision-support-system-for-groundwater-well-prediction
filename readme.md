@@ -63,17 +63,25 @@ Borewell Discharge	/model-3/borewell-discharge
 Drilling Technique	/model-4/drilling-technique
 Groundwater Quality	/model-5/groundwater-quality
 Example Requests
+
+
+
 Borewell Suitability
 {
   "latitude": 9.9252,
   "longitude": 78.1198
 }
+
+
 Water Bearing Zone Depth
 {
   "aquifer_thickness_m": 45,
   "elevation_m": 120
 }
+
+
 Borewell Discharge
+
 {
   "drilling_depth_m": 120,
   "bedrock_depth_m": 90,
@@ -86,6 +94,8 @@ Borewell Discharge
   "lineament_factor": 0.97,
   "lithology": "Granite"
 }
+
+
 Drilling Technique
 {
   "lithology": "Granite",
@@ -93,6 +103,8 @@ Drilling Technique
   "depth_to_water_m": 12.5,
   "distance_to_lineament_m": 900
 }
+
+
 Groundwater Quality
 {
   "pH": 7.6,
@@ -106,6 +118,8 @@ Groundwater Quality
   "Lithology_Group": "Charnockite_Granulite",
   "Soil_Texture_Group": "Medium"
 }
+
+
 Data Requirements
 
 Lithology (Shapefile)

@@ -3,6 +3,7 @@
 # ==========================================================
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
@@ -11,6 +12,7 @@ import pandas as pd
 import joblib
 import os
 from pathlib import Path
+from gis_service import get_gis_features
 
 # ==========================================================
 # PATH SETUP
@@ -33,6 +35,15 @@ Machine-learning based groundwater decision system providing:
 • Groundwater quality classification
 """,
     version="1.0.0"
+)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ==========================================================
@@ -100,22 +111,26 @@ class SuitabilityResponse(BaseModel):
 
 
 @app.post("/model-1/borewell-suitability", response_model=SuitabilityResponse)
-def predict_suitability(_: SuitabilityRequest):
+def predict_suitability(request: SuitabilityRequest):
+
+    gis_data = get_gis_features(request.latitude, request.longitude)
+    if gis_data is None:
+        raise HTTPException(status_code=400, detail="Coordinates out of bounds.")
 
     X = pd.DataFrame([{
         "lithology_type": enc_suitability["lithology_type"].transform(
-            [enc_suitability["lithology_type"].classes_[0]]
+            [gis_data["lithology_type"]]
         )[0],
         "aquifer_type": enc_suitability["aquifer_type"].transform(
-            [enc_suitability["aquifer_type"].classes_[0]]
+            [gis_data["aquifer_type"]]
         )[0],
         "soil_texture": enc_suitability["soil_texture"].transform(
-            [enc_suitability["soil_texture"].classes_[0]]
+            [gis_data["soil_texture"]]
         )[0],
-        "pre_wl": 15.0,
-        "post_wl": 10.0,
-        "seasonal_fluctuation": 5.0,
-        "annual_rainfall": 650.0
+        "pre_wl": gis_data["pre_wl"],
+        "post_wl": gis_data["post_wl"],
+        "seasonal_fluctuation": gis_data["seasonal_fluctuation"],
+        "annual_rainfall": gis_data["annual_rainfall"]
     }])
 
     probs = model_suitability.predict_proba(X)[0]
